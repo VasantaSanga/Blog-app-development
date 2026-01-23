@@ -1,0 +1,184 @@
+// Prisma Schema for Blog Application
+// Using PostgreSQL as the database
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User Model
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  avatar    String   @default("")
+  bio       String   @default("")
+  role      Role     @default(USER)
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  blogs     Blog[]
+  comments  Comment[]
+  likes     Like[]
+  blogViews BlogView[]
+
+  @@map("users")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+// Category Model
+model Category {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  slug        String   @unique
+  description String   @default("")
+  color       String   @default("#6366f1")
+  icon        String   @default("article")
+  createdAt   DateTime @default(now()) @map("created_at")
+  updatedAt   DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  blogs  Blog[]
+  topics Topic[]
+
+  @@map("categories")
+}
+
+// Topic Model (Predefined blog topic ideas)
+model Topic {
+  id            String     @id @default(uuid())
+  title         String
+  description   String     @default("")
+  difficulty    Difficulty @default(INTERMEDIATE)
+  suggestedTags String[]   @map("suggested_tags")
+  isActive      Boolean    @default(true) @map("is_active")
+  usageCount    Int        @default(0) @map("usage_count")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  categoryId String   @map("category_id")
+  category   Category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  blogs      Blog[]
+
+  @@unique([title, categoryId])
+  @@map("topics")
+}
+
+enum Difficulty {
+  BEGINNER
+  INTERMEDIATE
+  ADVANCED
+}
+
+// Blog Model
+model Blog {
+  id            String     @id @default(uuid())
+  title         String
+  slug          String     @unique
+  content       String     @db.Text
+  excerpt       String     @default("") @db.Text
+  coverImage    String     @default("") @map("cover_image")
+  tags          String[]
+  status        BlogStatus @default(DRAFT)
+  readingTime   Int        @default(0) @map("reading_time")
+  views         Int        @default(0)
+  publishedAt   DateTime?  @map("published_at")
+  lastAutoSaved DateTime?  @map("last_auto_saved")
+  createdAt     DateTime   @default(now()) @map("created_at")
+  updatedAt     DateTime   @updatedAt @map("updated_at")
+
+  // Relations
+  authorId   String    @map("author_id")
+  author     User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  categoryId String?   @map("category_id")
+  category   Category? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  topicId    String?   @map("topic_id")
+  topic      Topic?    @relation(fields: [topicId], references: [id], onDelete: SetNull)
+  comments   Comment[]
+  likes      Like[]
+  blogViews  BlogView[]
+
+  @@index([authorId, status])
+  @@index([categoryId, status])
+  @@index([publishedAt])
+  @@map("blogs")
+}
+
+enum BlogStatus {
+  DRAFT
+  PUBLISHED
+}
+
+// Comment Model
+model Comment {
+  id        String   @id @default(uuid())
+  content   String   @db.Text
+  isEdited  Boolean  @default(false) @map("is_edited")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  authorId        String    @map("author_id")
+  author          User      @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  blogId          String    @map("blog_id")
+  blog            Blog      @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  parentCommentId String?   @map("parent_comment_id")
+  parentComment   Comment?  @relation("CommentReplies", fields: [parentCommentId], references: [id], onDelete: Cascade)
+  replies         Comment[] @relation("CommentReplies")
+  likes           Like[]
+
+  @@index([blogId, parentCommentId])
+  @@map("comments")
+}
+
+// Like Model (for blogs and comments)
+model Like {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  userId    String   @map("user_id")
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  blogId    String?  @map("blog_id")
+  blog      Blog?    @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  commentId String?  @map("comment_id")
+  comment   Comment? @relation(fields: [commentId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, blogId])
+  @@unique([userId, commentId])
+  @@map("likes")
+}
+
+// BlogView Model (for tracking unique blog views)
+model BlogView {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  blogId    String   @map("blog_id")
+  blog      Blog     @relation(fields: [blogId], references: [id], onDelete: Cascade)
+  
+  // For logged-in users
+  userId    String?  @map("user_id")
+  user      User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  // For anonymous users (IP-based tracking)
+  ipAddress String?  @map("ip_address")
+
+  // Unique constraint: one view per user per blog, or one view per IP per blog
+  @@unique([blogId, userId])
+  @@unique([blogId, ipAddress])
+  @@index([blogId])
+  @@map("blog_views")
+}
