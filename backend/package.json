@@ -17,10 +17,17 @@
     "setup": "npm run prisma:generate && npm run prisma:push && npm run prisma:seed",
     "postinstall": "prisma generate"
   },
-  "keywords": ["blog", "express", "prisma", "typescript", "api"],
+  "keywords": [
+    "blog",
+    "express",
+    "prisma",
+    "typescript",
+    "api"
+  ],
   "author": "",
   "license": "MIT",
   "dependencies": {
+    "@google/generative-ai": "^0.24.1",
     "@prisma/client": "^5.8.1",
     "bcryptjs": "^2.4.3",
     "cors": "^2.8.5",

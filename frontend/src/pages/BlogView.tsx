@@ -37,6 +37,9 @@ import { blogAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Blog } from '../types';
 
+// Default cover image for blogs without a custom image (same as BlogCard)
+const DEFAULT_COVER_IMAGE = `${process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000'}/uploads/image-1768993313911-666459579.jpg`;
+
 function BlogView() {
   const { slug } = useParams();
   const navigate = useNavigate();
@@ -132,28 +135,26 @@ function BlogView() {
         Back
       </Button>
 
-      {/* Cover Image */}
-      {blog.coverImage && (
-        <Box
-          sx={{
+      {/* Cover Image - Always show (use default if not provided) */}
+      <Box
+        sx={{
+          width: '100%',
+          height: { xs: 250, md: 400 },
+          borderRadius: 4,
+          overflow: 'hidden',
+          mb: 4,
+        }}
+      >
+        <img
+          src={blog.coverImage || DEFAULT_COVER_IMAGE}
+          alt={blog.title}
+          style={{
             width: '100%',
-            height: { xs: 250, md: 400 },
-            borderRadius: 4,
-            overflow: 'hidden',
-            mb: 4,
+            height: '100%',
+            objectFit: 'cover',
           }}
-        >
-          <img
-            src={blog.coverImage}
-            alt={blog.title}
-            style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-            }}
-          />
-        </Box>
-      )}
+        />
+      </Box>
 
       {/* Category & Edit Button */}
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>

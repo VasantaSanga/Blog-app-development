@@ -21,6 +21,9 @@ export const config = {
   // Upload
   maxFileSize: parseInt(process.env.MAX_FILE_SIZE || '5242880', 10),
   uploadPath: process.env.UPLOAD_PATH || './uploads',
+  
+  // Google Gemini AI
+  geminiApiKey: process.env.GEMINI_API_KEY || '',
 } as const;
 
 export default config;

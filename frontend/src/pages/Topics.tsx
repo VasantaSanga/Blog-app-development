@@ -22,7 +22,7 @@ import {
   alpha,
   SelectChangeEvent,
 } from '@mui/material';
-import { Search, Shuffle, Edit, Category as CategoryIcon } from '@mui/icons-material';
+import { Search, Shuffle, Edit, Category as CategoryIcon, AutoAwesome } from '@mui/icons-material';
 import TopicCard from '../components/Common/TopicCard';
 import { topicAPI, categoryAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
@@ -113,7 +113,7 @@ function Topics() {
     }
   };
 
-  const handleWriteWithTopic = () => {
+  const handleWriteWithTopic = (useAI: boolean = false) => {
     if (!isAuthenticated) {
       toast.info('Please login to start writing');
       navigate('/login');
@@ -129,6 +129,8 @@ function Topics() {
         suggestedTitle: selectedTopic.title,
         suggestedTags: selectedTopic.suggestedTags,
         categoryId: selectedTopic.category?.id,
+        categoryName: selectedTopic.category?.name,
+        autoGenerate: useAI,
       },
     });
   };
@@ -254,16 +256,20 @@ function Topics() {
           <Button
             variant="contained"
             size="large"
-            startIcon={<Edit />}
-            onClick={handleWriteWithTopic}
+            startIcon={<AutoAwesome />}
+            onClick={() => handleWriteWithTopic(true)}
             sx={{
               px: 4,
               py: 1.5,
               fontSize: '1rem',
               fontWeight: 600,
+              background: 'linear-gradient(45deg, #9c27b0 30%, #673ab7 90%)',
+              '&:hover': {
+                background: 'linear-gradient(45deg, #7b1fa2 30%, #512da8 90%)',
+              },
             }}
           >
-            Write About This Topic
+            Write About This Topic by AI
           </Button>
         </Paper>
       )}

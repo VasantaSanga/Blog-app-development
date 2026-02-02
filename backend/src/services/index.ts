@@ -8,3 +8,4 @@ export { categoryService } from './category.service.js';
 export { topicService } from './topic.service.js';
 export { commentService } from './comment.service.js';
 export { uploadService } from './upload.service.js';
+export { aiService } from './ai.service.js';

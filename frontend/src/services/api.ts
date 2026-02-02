@@ -183,3 +183,19 @@ export const uploadAPI = {
   deleteImage: (filename: string): Promise<AxiosResponse<ApiResponse<null>>> => 
     api.delete(`/upload/image/${filename}`),
 };
+
+// AI API functions
+interface GenerateContentParams {
+  title: string;
+  tags?: string[];
+  category?: string;
+  tone?: 'professional' | 'casual' | 'technical' | 'creative';
+}
+
+export const aiAPI = {
+  generateContent: (params: GenerateContentParams): Promise<AxiosResponse<ApiResponse<{ content: string }>>> =>
+    api.post('/ai/generate', params),
+  
+  getStatus: (): Promise<AxiosResponse<ApiResponse<{ available: boolean }>>> =>
+    api.get('/ai/status'),
+};

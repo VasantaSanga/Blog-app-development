@@ -33,11 +33,12 @@ import {
   Close,
   ArrowBack,
   Check,
+  AutoAwesome,
 } from '@mui/icons-material';
 import { toast } from 'react-toastify';
 import TipTapEditor from '../components/Editor/TipTapEditor';
 import LoadingSpinner from '../components/Common/LoadingSpinner';
-import { blogAPI, categoryAPI, uploadAPI } from '../services/api';
+import { blogAPI, categoryAPI, uploadAPI, aiAPI } from '../services/api';
 import { Category } from '../types';
 
 function BlogEditor() {
@@ -63,6 +64,7 @@ function BlogEditor() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [publishing, setPublishing] = useState(false);
+  const [generating, setGenerating] = useState(false);
   const [autoSaveStatus, setAutoSaveStatus] = useState<'saving' | 'saved' | 'error' | null>(null);
   const [blogId, setBlogId] = useState<string | null>(id || null);
   const [publishDialogOpen, setPublishDialogOpen] = useState(false);
@@ -73,7 +75,7 @@ function BlogEditor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  // Apply topic data from navigation state
+  // Apply topic data from navigation state and auto-generate if requested
   useEffect(() => {
     if (location.state?.suggestedTitle && !isEditing) {
       setTitle(location.state.suggestedTitle);
@@ -83,7 +85,20 @@ function BlogEditor() {
       if (location.state.categoryId) {
         setCategory(location.state.categoryId);
       }
+      // Auto-generate content if requested from Topics page
+      if (location.state.autoGenerate) {
+        // Wait for initial data load before generating
+        const timer = setTimeout(() => {
+          handleGenerateAI(
+            location.state.suggestedTitle,
+            location.state.suggestedTags,
+            location.state.categoryName
+          );
+        }, 500);
+        return () => clearTimeout(timer);
+      }
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.state, isEditing]);
 
   const fetchInitialData = async () => {
@@ -324,6 +339,47 @@ function BlogEditor() {
     setCategory(event.target.value);
   };
 
+  // Generate content using AI
+  const handleGenerateAI = async (
+    customTitle?: string,
+    customTags?: string[],
+    customCategoryName?: string
+  ) => {
+    const titleToUse = customTitle || title;
+    
+    if (!titleToUse.trim()) {
+      toast.error('Please enter a title first');
+      return;
+    }
+
+    setGenerating(true);
+    try {
+      // Get category name for context
+      let categoryName = customCategoryName;
+      if (!categoryName && category) {
+        const selectedCategory = categories.find(c => c.id === category);
+        categoryName = selectedCategory?.name;
+      }
+
+      const response = await aiAPI.generateContent({
+        title: titleToUse,
+        tags: customTags || tags,
+        category: categoryName,
+        tone: 'professional',
+      });
+
+      const generatedContent = response.data.data.content;
+      setContent(generatedContent);
+      toast.success('Content generated successfully!');
+    } catch (error: unknown) {
+      console.error('AI generation error:', error);
+      const err = error as { response?: { data?: { message?: string } } };
+      toast.error(err.response?.data?.message || 'Failed to generate content');
+    } finally {
+      setGenerating(false);
+    }
+  };
+
   if (loading) {
     return <LoadingSpinner message="Loading editor..." />;
   }
@@ -370,9 +426,26 @@ function BlogEditor() {
         <Stack direction="row" spacing={2}>
           <Button
             variant="outlined"
+            color="secondary"
+            startIcon={generating ? <CircularProgress size={18} /> : <AutoAwesome />}
+            onClick={() => handleGenerateAI()}
+            disabled={saving || publishing || generating}
+            sx={{
+              borderColor: 'secondary.main',
+              '&:hover': {
+                borderColor: 'secondary.dark',
+                bgcolor: 'secondary.dark',
+                color: 'white',
+              },
+            }}
+          >
+            {generating ? 'Generating...' : 'Generate by AI'}
+          </Button>
+          <Button
+            variant="outlined"
             startIcon={saving ? <CircularProgress size={18} /> : <Save />}
             onClick={handleSaveDraft}
-            disabled={saving || publishing}
+            disabled={saving || publishing || generating}
           >
             Save Draft
           </Button>
@@ -380,7 +453,7 @@ function BlogEditor() {
             variant="contained"
             startIcon={publishing ? <CircularProgress size={18} color="inherit" /> : <Publish />}
             onClick={() => setPublishDialogOpen(true)}
-            disabled={saving || publishing}
+            disabled={saving || publishing || generating}
           >
             Publish
           </Button>
