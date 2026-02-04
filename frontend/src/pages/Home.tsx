@@ -17,10 +17,19 @@ import {
   alpha,
 } from '@mui/material';
 import { Edit, TrendingUp, ArrowForward } from '@mui/icons-material';
+import { motion } from 'framer-motion';
 import BlogCard from '../components/Blog/BlogCard';
 import { blogAPI, categoryAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Blog, Category } from '../types';
+import { 
+  FadeInUp, 
+  ScrollReveal, 
+  staggerContainer, 
+  fadeInUp,
+  scaleIn,
+  MotionBox
+} from '../components/Common/Animations';
 
 interface BlogParams {
   limit: number;
@@ -75,6 +84,10 @@ function Home() {
     <Box>
       {/* Hero Section */}
       <Paper
+        component={motion.div}
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.8, ease: [0.25, 0.46, 0.45, 0.94] }}
         elevation={0}
         sx={{
           position: 'relative',
@@ -100,139 +113,222 @@ function Home() {
           },
         }}
       >
+        {/* Animated background particles */}
+        <Box
+          component={motion.div}
+          animate={{
+            backgroundPosition: ['0% 0%', '100% 100%'],
+          }}
+          transition={{
+            duration: 20,
+            repeat: Infinity,
+            repeatType: 'reverse',
+            ease: 'linear'
+          }}
+          sx={{
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            opacity: 0.5,
+            background: `radial-gradient(circle at 20% 80%, ${alpha('#6366f1', 0.15)} 0%, transparent 30%),
+                         radial-gradient(circle at 80% 20%, ${alpha('#ec4899', 0.15)} 0%, transparent 30%)`,
+            backgroundSize: '200% 200%',
+            pointerEvents: 'none',
+          }}
+        />
+        
         <Box sx={{ position: 'relative', zIndex: 1, textAlign: 'center' }}>
-          <Typography
-            variant="h1"
-            sx={{
-              fontSize: { xs: '2.5rem', md: '4rem' },
-              fontWeight: 700,
-              mb: 2,
-              background: (theme) =>
-                `linear-gradient(135deg, ${theme.palette.text.primary} 0%, ${theme.palette.primary.main} 100%)`,
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              lineHeight: 1.1,
-            }}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
           >
-            Write. Publish. Inspire.
-          </Typography>
-          <Typography
-            variant="h5"
-            color="text.secondary"
-            sx={{
-              mb: 4,
-              maxWidth: 600,
-              mx: 'auto',
-              fontWeight: 400,
-              lineHeight: 1.6,
-            }}
-          >
-            Share your stories with the world. Beautiful writing experience, powerful publishing tools.
-          </Typography>
-          <Stack
-            direction={{ xs: 'column', sm: 'row' }}
-            spacing={2}
-            justifyContent="center"
-          >
-            {isAuthenticated ? (
-              <Button
-                component={RouterLink}
-                to="/editor"
-                variant="contained"
-                size="large"
-                startIcon={<Edit />}
-                sx={{ px: 4, py: 1.5 }}
-              >
-                Start Writing
-              </Button>
-            ) : (
-              <Button
-                component={RouterLink}
-                to="/register"
-                variant="contained"
-                size="large"
-                sx={{ px: 4, py: 1.5 }}
-              >
-                Get Started Free
-              </Button>
-            )}
-            <Button
-              component={RouterLink}
-              to="/topics"
-              variant="outlined"
-              size="large"
-              startIcon={<TrendingUp />}
-              sx={{ px: 4, py: 1.5 }}
+            <Typography
+              variant="h1"
+              sx={{
+                fontSize: { xs: '2.5rem', md: '4rem' },
+                fontWeight: 700,
+                mb: 2,
+                background: (theme) =>
+                  `linear-gradient(135deg, ${theme.palette.text.primary} 0%, ${theme.palette.primary.main} 100%)`,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                lineHeight: 1.1,
+              }}
             >
-              Explore Topics
-            </Button>
-          </Stack>
+              Write. Publish. Inspire.
+            </Typography>
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.4 }}
+          >
+            <Typography
+              variant="h5"
+              color="text.secondary"
+              sx={{
+                mb: 4,
+                maxWidth: 600,
+                mx: 'auto',
+                fontWeight: 400,
+                lineHeight: 1.6,
+              }}
+            >
+              Share your stories with the world. Beautiful writing experience, powerful publishing tools.
+            </Typography>
+          </motion.div>
+          
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.6 }}
+          >
+            <Stack
+              direction={{ xs: 'column', sm: 'row' }}
+              spacing={2}
+              justifyContent="center"
+            >
+              {isAuthenticated ? (
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    component={RouterLink}
+                    to="/editor"
+                    variant="contained"
+                    size="large"
+                    startIcon={<Edit />}
+                    sx={{ px: 4, py: 1.5 }}
+                  >
+                    Start Writing
+                  </Button>
+                </motion.div>
+              ) : (
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <Button
+                    component={RouterLink}
+                    to="/register"
+                    variant="contained"
+                    size="large"
+                    sx={{ px: 4, py: 1.5 }}
+                  >
+                    Get Started Free
+                  </Button>
+                </motion.div>
+              )}
+              <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                <Button
+                  component={RouterLink}
+                  to="/topics"
+                  variant="outlined"
+                  size="large"
+                  startIcon={<TrendingUp />}
+                  sx={{ px: 4, py: 1.5 }}
+                >
+                  Explore Topics
+                </Button>
+              </motion.div>
+            </Stack>
+          </motion.div>
         </Box>
       </Paper>
 
       {/* Categories Filter */}
-      <Box sx={{ mb: 4 }}>
-        <Stack
-          direction="row"
-          spacing={1}
-          sx={{
-            flexWrap: 'wrap',
-            gap: 1,
-            justifyContent: 'center',
-          }}
-        >
-          <Chip
-            label="All"
-            onClick={() => setSelectedCategory(null)}
-            variant={selectedCategory === null ? 'filled' : 'outlined'}
-            color="primary"
-            sx={{ fontWeight: 500 }}
-          />
-          {categories.map((category) => (
-            <Chip
-              key={category.id}
-              label={category.name}
-              onClick={() => setSelectedCategory(category.id)}
-              variant={selectedCategory === category.id ? 'filled' : 'outlined'}
-              sx={{
-                fontWeight: 500,
-                ...(selectedCategory === category.id && {
-                  bgcolor: category.color,
-                  color: '#fff',
-                  '&:hover': {
-                    bgcolor: category.color,
-                  },
-                }),
-              }}
-            />
-          ))}
-        </Stack>
-      </Box>
+      <ScrollReveal direction="up" delay={0.1}>
+        <Box sx={{ mb: 4 }}>
+          <Stack
+            component={motion.div}
+            variants={staggerContainer}
+            initial="hidden"
+            animate="visible"
+            direction="row"
+            spacing={1}
+            sx={{
+              flexWrap: 'wrap',
+              gap: 1,
+              justifyContent: 'center',
+            }}
+          >
+            <motion.div variants={scaleIn} whileHover={{ scale: 1.1 }} whileTap={{ scale: 0.95 }}>
+              <Chip
+                label="All"
+                onClick={() => setSelectedCategory(null)}
+                variant={selectedCategory === null ? 'filled' : 'outlined'}
+                color="primary"
+                sx={{ fontWeight: 500, cursor: 'pointer' }}
+              />
+            </motion.div>
+            {categories.map((category, index) => (
+              <motion.div 
+                key={category.id} 
+                variants={scaleIn}
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.95 }}
+              >
+                <Chip
+                  label={category.name}
+                  onClick={() => setSelectedCategory(category.id)}
+                  variant={selectedCategory === category.id ? 'filled' : 'outlined'}
+                  sx={{
+                    fontWeight: 500,
+                    cursor: 'pointer',
+                    transition: 'all 0.3s ease',
+                    ...(selectedCategory === category.id && {
+                      bgcolor: category.color,
+                      color: '#fff',
+                      '&:hover': {
+                        bgcolor: category.color,
+                      },
+                    }),
+                  }}
+                />
+              </motion.div>
+            ))}
+          </Stack>
+        </Box>
+      </ScrollReveal>
 
       {/* Section Title */}
-      <Box
-        sx={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          mb: 3,
-        }}
-      >
-        <Typography variant="h4" sx={{ fontFamily: '"Crimson Pro", serif' }}>
-          Latest Stories
-        </Typography>
-      </Box>
+      <ScrollReveal direction="up" delay={0.2}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            mb: 3,
+          }}
+        >
+          <Typography variant="h4" sx={{ fontFamily: '"Crimson Pro", serif' }}>
+            Latest Stories
+          </Typography>
+        </Box>
+      </ScrollReveal>
 
       {/* Blog Grid */}
-      <Grid container spacing={3}>
+      <Grid 
+        container 
+        spacing={3}
+        component={motion.div}
+        variants={staggerContainer}
+        initial="hidden"
+        animate="visible"
+      >
         {loading
           ? Array.from({ length: 6 }).map((_, index) => (
               <Grid item xs={12} sm={6} md={4} key={index}>
-                <Skeleton
-                  variant="rectangular"
-                  height={300}
-                  sx={{ borderRadius: 4 }}
-                />
+                <motion.div
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <Skeleton
+                    variant="rectangular"
+                    height={300}
+                    sx={{ borderRadius: 4 }}
+                  />
+                </motion.div>
               </Grid>
             ))
           : blogs.map((blog, index) => (
@@ -242,13 +338,14 @@ function Home() {
                 sm={6}
                 md={4}
                 key={blog.id}
-                sx={{
-                  animation: 'fadeIn 0.5s ease-out forwards',
-                  animationDelay: `${index * 0.1}s`,
-                  opacity: 0,
-                }}
               >
-                <BlogCard blog={blog} />
+                <motion.div
+                  variants={fadeInUp}
+                  whileHover={{ y: -8 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <BlogCard blog={blog} />
+                </motion.div>
               </Grid>
             ))}
       </Grid>
@@ -281,16 +378,24 @@ function Home() {
 
       {/* View More */}
       {blogs.length >= 9 && (
-        <Box sx={{ textAlign: 'center', mt: 4 }}>
-          <Button
-            component={RouterLink}
-            to="/search"
-            endIcon={<ArrowForward />}
-            sx={{ fontSize: '1rem' }}
-          >
-            View All Blogs
-          </Button>
-        </Box>
+        <ScrollReveal direction="up">
+          <Box sx={{ textAlign: 'center', mt: 4 }}>
+            <motion.div 
+              whileHover={{ scale: 1.05, x: 5 }} 
+              whileTap={{ scale: 0.95 }}
+              style={{ display: 'inline-block' }}
+            >
+              <Button
+                component={RouterLink}
+                to="/search"
+                endIcon={<ArrowForward />}
+                sx={{ fontSize: '1rem' }}
+              >
+                View All Blogs
+              </Button>
+            </motion.div>
+          </Box>
+        </ScrollReveal>
       )}
     </Box>
   );

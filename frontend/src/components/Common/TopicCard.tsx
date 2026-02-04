@@ -1,11 +1,12 @@
 /**
  * Topic Card Component
- * Displays a blog topic idea for selection
+ * Displays a blog topic idea for selection with animations
  */
 
 import React, { ReactElement } from 'react';
-import { Card, CardContent, Typography, Box, Chip, Stack } from '@mui/material';
+import { Card, CardContent, Typography, Box, Chip, Stack, alpha } from '@mui/material';
 import { TrendingUp, School, EmojiEvents } from '@mui/icons-material';
+import { motion } from 'framer-motion';
 import { Topic } from '../../types';
 
 interface DifficultyConfig {
@@ -35,21 +36,48 @@ function TopicCard({ topic, onClick, selected }: TopicCardProps) {
 
   return (
     <Card
+      component={motion.div}
+      whileHover={{ y: -8 }}
+      whileTap={{ scale: 0.98 }}
       onClick={() => onClick(topic)}
       sx={{
         cursor: 'pointer',
         height: '100%',
-        transition: 'all 0.3s ease',
+        transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
         border: 2,
         borderColor: selected ? 'primary.main' : 'transparent',
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: (theme) => 
+            `linear-gradient(135deg, ${alpha(theme.palette.primary.main, 0.05)} 0%, ${alpha(theme.palette.secondary.main, 0.05)} 100%)`,
+          opacity: 0,
+          transition: 'opacity 0.4s ease',
+          zIndex: 0,
+        },
         '&:hover': {
-          transform: 'translateY(-4px)',
           boxShadow: (theme) =>
             theme.palette.mode === 'dark'
-              ? '0 12px 40px rgba(0, 0, 0, 0.4)'
-              : '0 12px 40px rgba(0, 0, 0, 0.1)',
+              ? '0 20px 60px rgba(99, 102, 241, 0.2), 0 8px 20px rgba(0, 0, 0, 0.3)'
+              : '0 20px 60px rgba(99, 102, 241, 0.12), 0 8px 20px rgba(0, 0, 0, 0.06)',
           borderColor: selected ? 'primary.main' : 'primary.light',
+          '&::before': {
+            opacity: 1,
+          },
+          '& .topic-title': {
+            color: 'primary.main',
+          },
         },
+        ...(selected && {
+          boxShadow: (theme) =>
+            `0 0 0 2px ${theme.palette.primary.main}, 0 10px 40px ${alpha(theme.palette.primary.main, 0.3)}`,
+        }),
       }}
     >
       <CardContent>
@@ -78,11 +106,13 @@ function TopicCard({ topic, onClick, selected }: TopicCardProps) {
         {/* Title */}
         <Typography
           variant="h6"
+          className="topic-title"
           sx={{
             fontFamily: '"Crimson Pro", serif',
             fontWeight: 600,
             mb: 1,
             lineHeight: 1.3,
+            transition: 'color 0.3s ease',
           }}
         >
           {topic.title}

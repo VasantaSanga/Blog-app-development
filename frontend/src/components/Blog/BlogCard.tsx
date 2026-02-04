@@ -1,6 +1,6 @@
 /**
  * Blog Card Component
- * Displays blog preview in list views
+ * Displays blog preview in list views with smooth animations
  */
 
 import React from 'react';
@@ -17,6 +17,7 @@ import {
 } from '@mui/material';
 import { AccessTime, Visibility, Favorite } from '@mui/icons-material';
 import { format } from 'date-fns';
+import { motion } from 'framer-motion';
 import { Blog } from '../../types';
 
 // Default cover image for blogs without a custom image
@@ -59,16 +60,35 @@ function BlogCard({ blog, variant = 'default' }: BlogCardProps) {
         flexDirection: isCompact ? 'row' : 'column',
         textDecoration: 'none',
         height: '100%',
-        transition: 'all 0.3s ease',
+        transition: 'all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
         overflow: 'hidden',
+        position: 'relative',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          top: 0,
+          left: 0,
+          right: 0,
+          bottom: 0,
+          background: 'linear-gradient(135deg, rgba(99, 102, 241, 0.1) 0%, rgba(236, 72, 153, 0.1) 100%)',
+          opacity: 0,
+          transition: 'opacity 0.4s ease',
+          zIndex: 0,
+          pointerEvents: 'none',
+        },
         '&:hover': {
-          transform: 'translateY(-4px)',
           boxShadow: (theme) =>
             theme.palette.mode === 'dark'
-              ? '0 12px 40px rgba(0, 0, 0, 0.4)'
-              : '0 12px 40px rgba(0, 0, 0, 0.1)',
+              ? '0 20px 60px rgba(99, 102, 241, 0.2), 0 8px 20px rgba(0, 0, 0, 0.3)'
+              : '0 20px 60px rgba(99, 102, 241, 0.15), 0 8px 20px rgba(0, 0, 0, 0.08)',
+          '&::before': {
+            opacity: 1,
+          },
           '& .blog-image': {
-            transform: 'scale(1.05)',
+            transform: 'scale(1.08)',
+          },
+          '& .blog-title': {
+            color: 'primary.main',
           },
         },
       }}
@@ -91,7 +111,7 @@ function BlogCard({ blog, variant = 'default' }: BlogCardProps) {
           sx={{
             height: '100%',
             objectFit: 'cover',
-            transition: 'transform 0.3s ease',
+            transition: 'transform 0.6s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
           }}
         />
         {category && (
@@ -117,6 +137,7 @@ function BlogCard({ blog, variant = 'default' }: BlogCardProps) {
         <Typography
           variant={isCompact ? 'h6' : 'h5'}
           component="h2"
+          className="blog-title"
           sx={{
             fontFamily: '"Crimson Pro", serif',
             fontWeight: 600,
@@ -126,6 +147,7 @@ function BlogCard({ blog, variant = 'default' }: BlogCardProps) {
             WebkitBoxOrient: 'vertical',
             overflow: 'hidden',
             color: 'text.primary',
+            transition: 'color 0.3s ease',
           }}
         >
           {title}

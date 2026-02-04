@@ -40,6 +40,7 @@ import {
   Logout as LogoutIcon,
   Close as CloseIcon,
 } from '@mui/icons-material';
+import { motion, AnimatePresence } from 'framer-motion';
 import { useThemeContext } from '../../context/ThemeContext';
 import { useAuth } from '../../context/AuthContext';
 
@@ -100,22 +101,28 @@ function Navbar(): JSX.Element {
       >
         <Toolbar sx={{ justifyContent: 'space-between', gap: 2 }}>
           {/* Logo */}
-          <Typography
-            component={RouterLink}
-            to="/"
-            variant="h5"
-            sx={{
-              fontFamily: '"Crimson Pro", serif',
-              fontWeight: 700,
-              background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
-              WebkitBackgroundClip: 'text',
-              WebkitTextFillColor: 'transparent',
-              textDecoration: 'none',
-              letterSpacing: '-0.5px',
-            }}
+          <motion.div
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
-            Scribely
-          </Typography>
+            <Typography
+              component={RouterLink}
+              to="/"
+              variant="h5"
+              sx={{
+                fontFamily: '"Crimson Pro", serif',
+                fontWeight: 700,
+                background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+                WebkitBackgroundClip: 'text',
+                WebkitTextFillColor: 'transparent',
+                textDecoration: 'none',
+                letterSpacing: '-0.5px',
+                transition: 'all 0.3s ease',
+              }}
+            >
+              Scribely
+            </Typography>
+          </motion.div>
 
           {/* Desktop Navigation */}
           {!isMobile && (
@@ -157,64 +164,122 @@ function Navbar(): JSX.Element {
 
               {/* Nav Links */}
               <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                {navLinks.map((link) => (
-                  <Button
+                {navLinks.map((link, index) => (
+                  <motion.div
                     key={link.path}
-                    component={RouterLink}
-                    to={link.path}
-                    sx={{ color: 'text.primary' }}
+                    initial={{ opacity: 0, y: -10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
+                    whileHover={{ y: -2 }}
                   >
-                    {link.label}
-                  </Button>
+                    <Button
+                      component={RouterLink}
+                      to={link.path}
+                      sx={{ 
+                        color: 'text.primary',
+                        position: 'relative',
+                        '&::after': {
+                          content: '""',
+                          position: 'absolute',
+                          bottom: 0,
+                          left: '50%',
+                          transform: 'translateX(-50%)',
+                          width: 0,
+                          height: 2,
+                          bgcolor: 'primary.main',
+                          transition: 'width 0.3s ease',
+                          borderRadius: 1,
+                        },
+                        '&:hover::after': {
+                          width: '80%',
+                        },
+                      }}
+                    >
+                      {link.label}
+                    </Button>
+                  </motion.div>
                 ))}
 
                 {/* Theme Toggle */}
-                <IconButton onClick={toggleTheme} sx={{ color: 'text.primary' }}>
-                  {mode === 'dark' ? <LightMode /> : <DarkMode />}
-                </IconButton>
+                <motion.div
+                  whileHover={{ rotate: 180 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <IconButton onClick={toggleTheme} sx={{ color: 'text.primary' }}>
+                    <AnimatePresence mode="wait">
+                      <motion.div
+                        key={mode}
+                        initial={{ scale: 0, rotate: -180 }}
+                        animate={{ scale: 1, rotate: 0 }}
+                        exit={{ scale: 0, rotate: 180 }}
+                        transition={{ duration: 0.3 }}
+                      >
+                        {mode === 'dark' ? <LightMode /> : <DarkMode />}
+                      </motion.div>
+                    </AnimatePresence>
+                  </IconButton>
+                </motion.div>
 
                 {/* Auth Buttons / User Menu */}
                 {isAuthenticated ? (
                   <>
-                    <Button
-                      component={RouterLink}
-                      to="/editor"
-                      variant="contained"
-                      startIcon={<EditIcon />}
-                      sx={{ ml: 1 }}
+                    <motion.div
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
                     >
-                      Write
-                    </Button>
-                    <IconButton onClick={handleUserMenuOpen} sx={{ ml: 1 }}>
-                      <Avatar
-                        src={user?.avatar}
-                        sx={{
-                          width: 36,
-                          height: 36,
-                          bgcolor: 'primary.main',
-                          fontSize: '0.875rem',
-                        }}
+                      <Button
+                        component={RouterLink}
+                        to="/editor"
+                        variant="contained"
+                        startIcon={<EditIcon />}
+                        sx={{ ml: 1 }}
                       >
-                        {user?.name?.charAt(0).toUpperCase()}
-                      </Avatar>
-                    </IconButton>
+                        Write
+                      </Button>
+                    </motion.div>
+                    <motion.div
+                      whileHover={{ scale: 1.1 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <IconButton onClick={handleUserMenuOpen} sx={{ ml: 1 }}>
+                        <Avatar
+                          src={user?.avatar}
+                          sx={{
+                            width: 36,
+                            height: 36,
+                            bgcolor: 'primary.main',
+                            fontSize: '0.875rem',
+                            transition: 'box-shadow 0.3s ease',
+                            '&:hover': {
+                              boxShadow: (theme) => `0 0 0 3px ${alpha(theme.palette.primary.main, 0.3)}`,
+                            },
+                          }}
+                        >
+                          {user?.name?.charAt(0).toUpperCase()}
+                        </Avatar>
+                      </IconButton>
+                    </motion.div>
                   </>
                 ) : (
                   <>
-                    <Button
-                      component={RouterLink}
-                      to="/login"
-                      sx={{ color: 'text.primary' }}
-                    >
-                      Sign In
-                    </Button>
-                    <Button
-                      component={RouterLink}
-                      to="/register"
-                      variant="contained"
-                    >
-                      Get Started
-                    </Button>
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <Button
+                        component={RouterLink}
+                        to="/login"
+                        sx={{ color: 'text.primary' }}
+                      >
+                        Sign In
+                      </Button>
+                    </motion.div>
+                    <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                      <Button
+                        component={RouterLink}
+                        to="/register"
+                        variant="contained"
+                      >
+                        Get Started
+                      </Button>
+                    </motion.div>
                   </>
                 )}
               </Box>
