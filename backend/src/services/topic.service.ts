@@ -23,7 +23,10 @@ class TopicService {
     }
 
     if (options.difficulty) {
-      where.difficulty = options.difficulty.toUpperCase();
+      const upperDifficulty = options.difficulty.toUpperCase();
+      if (upperDifficulty === 'BEGINNER' || upperDifficulty === 'INTERMEDIATE' || upperDifficulty === 'ADVANCED') {
+        where.difficulty = upperDifficulty as Difficulty;
+      }
     }
 
     if (options.search) {
@@ -114,8 +117,15 @@ class TopicService {
 
     if (input.title !== undefined) updateData.title = input.title;
     if (input.description !== undefined) updateData.description = input.description;
-    if (input.category !== undefined) updateData.categoryId = input.category;
-    if (input.difficulty !== undefined) updateData.difficulty = input.difficulty.toUpperCase();
+    if (input.category !== undefined) {
+      updateData.category = { connect: { id: input.category } };
+    }
+    if (input.difficulty !== undefined) {
+      const upperDifficulty = input.difficulty.toUpperCase();
+      if (upperDifficulty === 'BEGINNER' || upperDifficulty === 'INTERMEDIATE' || upperDifficulty === 'ADVANCED') {
+        updateData.difficulty = upperDifficulty as Difficulty;
+      }
+    }
     if (input.suggestedTags !== undefined) updateData.suggestedTags = input.suggestedTags;
     if (input.isActive !== undefined) updateData.isActive = input.isActive;
 

@@ -35,6 +35,17 @@ export const generateContent = async (
 
     const { title, tags, category, tone } = req.body;
 
+    // Validate required fields
+    if (!title || typeof title !== 'string' || title.trim().length === 0) {
+      res.status(400).json({
+        status: 'error',
+        message: 'Title is required for content generation',
+      });
+      return;
+    }
+
+    console.log('Generating content with:', { title, tags, category, tone });
+
     const content = await aiService.generateBlogContent({
       title,
       tags,
@@ -47,6 +58,7 @@ export const generateContent = async (
       data: { content },
     });
   } catch (error) {
+    console.error('Error in generateContent controller:', error);
     next(error);
   }
 };

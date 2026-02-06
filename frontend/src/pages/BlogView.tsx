@@ -36,6 +36,7 @@ import LoadingSpinner from '../components/Common/LoadingSpinner';
 import { blogAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Blog } from '../types';
+import { getImageUrl } from '../utils/imageUtils';
 
 // Default cover image for blogs without a custom image (same as BlogCard)
 const DEFAULT_COVER_IMAGE = `${process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000'}/uploads/image-1768993313911-666459579.jpg`;
@@ -146,7 +147,7 @@ function BlogView() {
         }}
       >
         <img
-          src={blog.coverImage || DEFAULT_COVER_IMAGE}
+          src={getImageUrl(blog.coverImage || DEFAULT_COVER_IMAGE)}
           alt={blog.title}
           style={{
             width: '100%',
@@ -229,7 +230,7 @@ function BlogView() {
           </Box>
           <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
             <Visibility fontSize="small" />
-            <Typography variant="body2">{blog.views} views</Typography>
+            <Typography variant="body2">{blog.views || 0} views</Typography>
           </Box>
         </Stack>
       </Box>

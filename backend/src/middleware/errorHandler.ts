@@ -54,7 +54,9 @@ export const errorHandler = (
 
   // Default error
   const statusCode = err.statusCode || 500;
-  const message = statusCode === 500 ? 'Internal server error' : err.message;
+  // Preserve error message even for 500 errors to help with debugging
+  // Only use generic message if no message exists
+  const message = err.message || 'Internal server error';
 
   res.status(statusCode).json({
     status: 'error',

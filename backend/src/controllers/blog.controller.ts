@@ -58,8 +58,13 @@ export const getBlogBySlug = async (
   try {
     const blog = await blogService.getBlogBySlug(req.params.slug, req.user?.id);
 
-    // Track unique view
-    await blogService.trackView(blog.id, req.user?.id, getClientIp(req));
+    // Track unique view and get updated view count
+    const updatedViewCount = await blogService.trackView(blog.id, req.user?.id, getClientIp(req));
+    
+    // Update blog object with new view count if view was tracked
+    if (updatedViewCount !== null) {
+      blog.views = updatedViewCount;
+    }
 
     res.json({
       status: 'success',

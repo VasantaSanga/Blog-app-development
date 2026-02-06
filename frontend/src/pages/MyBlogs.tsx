@@ -135,7 +135,7 @@ function MyBlogs() {
   };
 
   const BlogCardWithMenu = ({ blog }: { blog: Blog }) => (
-    <Box sx={{ position: 'relative' }}>
+    <Box sx={{ position: 'relative', height: '100%', display: 'flex', flexDirection: 'column' }}>
       <BlogCard blog={blog} />
       <IconButton
         size="small"
@@ -228,8 +228,20 @@ function MyBlogs() {
               </Grid>
             ))
           : blogs.map((blog) => (
-              <Grid item xs={12} sm={6} md={4} key={blog.id}>
-                <BlogCardWithMenu blog={blog} />
+              <Grid 
+                item 
+                xs={12} 
+                sm={6} 
+                md={4} 
+                key={blog.id}
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
+              >
+                <Box sx={{ height: '100%', display: 'flex', flexDirection: 'column', position: 'relative' }}>
+                  <BlogCardWithMenu blog={blog} />
+                </Box>
               </Grid>
             ))}
       </Grid>

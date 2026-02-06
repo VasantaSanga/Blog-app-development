@@ -4,7 +4,7 @@
  */
 
 import slugify from 'slugify';
-import { Prisma } from '@prisma/client';
+import { Prisma, BlogStatus } from '@prisma/client';
 import prisma from '../config/prisma.js';
 import type { CreateBlogInput, UpdateBlogInput } from '../types/index.js';
 
@@ -187,8 +187,9 @@ class BlogService {
 
   /**
    * Track unique blog view
+   * Returns the updated view count if view was tracked, otherwise returns null
    */
-  async trackView(blogId: string, userId?: string, ipAddress?: string) {
+  async trackView(blogId: string, userId?: string, ipAddress?: string): Promise<number | null> {
     try {
       if (userId) {
         const existingView = await prisma.blogView.findUnique({
@@ -199,10 +200,12 @@ class BlogService {
           await prisma.blogView.create({
             data: { blogId, userId },
           });
-          await prisma.blog.update({
+          const updatedBlog = await prisma.blog.update({
             where: { id: blogId },
             data: { views: { increment: 1 } },
+            select: { views: true },
           });
+          return updatedBlog.views;
         }
       } else if (ipAddress && ipAddress !== 'unknown') {
         const existingView = await prisma.blogView.findUnique({
@@ -213,18 +216,24 @@ class BlogService {
           await prisma.blogView.create({
             data: { blogId, ipAddress },
           });
-          await prisma.blog.update({
+          const updatedBlog = await prisma.blog.update({
             where: { id: blogId },
             data: { views: { increment: 1 } },
+            select: { views: true },
           });
+          return updatedBlog.views;
         }
       }
+
+      // If view already exists, return null (no update needed)
+      return null;
     } catch (error: unknown) {
       // Ignore duplicate key errors
       const prismaError = error as { code?: string };
       if (prismaError.code !== 'P2002') {
         console.error('Error tracking view:', error);
       }
+      return null;
     }
   }
 
@@ -242,7 +251,10 @@ class BlogService {
     const where: Prisma.BlogWhereInput = { authorId: userId };
 
     if (options.status) {
-      where.status = options.status.toUpperCase();
+      const upperStatus = options.status.toUpperCase();
+      if (upperStatus === 'PUBLISHED' || upperStatus === 'DRAFT') {
+        where.status = upperStatus as BlogStatus;
+      }
     }
 
     const [blogs, total] = await Promise.all([
@@ -352,12 +364,17 @@ class BlogService {
 
     if (input.excerpt !== undefined) updateData.excerpt = input.excerpt;
     if (input.coverImage !== undefined) updateData.coverImage = input.coverImage;
-    if (input.category !== undefined) updateData.categoryId = input.category || null;
+    if (input.category !== undefined) {
+      updateData.category = input.category 
+        ? { connect: { id: input.category } }
+        : { disconnect: true };
+    }
     if (input.tags !== undefined) updateData.tags = input.tags;
 
     if (input.status) {
-      updateData.status = input.status.toUpperCase();
-      if (input.status === 'published' && !blog.publishedAt) {
+      const upperStatus = input.status.toUpperCase();
+      updateData.status = (upperStatus === 'PUBLISHED' ? BlogStatus.PUBLISHED : BlogStatus.DRAFT);
+      if (input.status.toLowerCase() === 'published' && !blog.publishedAt) {
         updateData.publishedAt = new Date();
       }
     }
@@ -403,7 +420,11 @@ class BlogService {
     }
     if (input.excerpt !== undefined) updateData.excerpt = input.excerpt;
     if (input.coverImage !== undefined) updateData.coverImage = input.coverImage;
-    if (input.category !== undefined) updateData.categoryId = input.category || null;
+    if (input.category !== undefined) {
+      updateData.category = input.category 
+        ? { connect: { id: input.category } }
+        : { disconnect: true };
+    }
     if (input.tags !== undefined) updateData.tags = input.tags;
 
     const updatedBlog = await prisma.blog.update({

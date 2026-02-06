@@ -12,8 +12,33 @@ class AIService {
 
   constructor() {
     if (config.geminiApiKey) {
-      this.genAI = new GoogleGenerativeAI(config.geminiApiKey);
-      this.model = this.genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+      try {
+        this.genAI = new GoogleGenerativeAI(config.geminiApiKey);
+        // Use gemini-2.0-flash (available for new projects in 2025)
+        // Note: gemini-1.5-pro and gemini-1.5-flash are no longer available for new projects
+        // Alternative fallback: gemini-3-flash-preview or gemini-3-pro-preview
+        this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+        console.log('AI Service initialized successfully with model: gemini-2.0-flash');
+      } catch (error) {
+        console.error('Failed to initialize AI Service with gemini-2.0-flash:', error);
+        // Try fallback models
+        try {
+          this.model = this.genAI!.getGenerativeModel({ model: 'gemini-3-flash-preview' });
+          console.log('AI Service initialized with fallback model: gemini-3-flash-preview');
+        } catch (fallbackError1) {
+          console.error('Fallback model gemini-3-flash-preview failed:', fallbackError1);
+          try {
+            this.model = this.genAI!.getGenerativeModel({ model: 'gemini-3-pro-preview' });
+            console.log('AI Service initialized with fallback model: gemini-3-pro-preview');
+          } catch (fallbackError2) {
+            console.error('All models failed to initialize:', fallbackError2);
+            this.genAI = null;
+            this.model = null;
+          }
+        }
+      }
+    } else {
+      console.warn('GEMINI_API_KEY not found in environment variables. AI service will not be available.');
     }
   }
 
@@ -51,9 +76,35 @@ class AIService {
 
       return htmlContent;
     } catch (error: unknown) {
-      console.error('Gemini AI error:', error);
-      const err = error as { message?: string };
-      throw { statusCode: 500, message: `AI generation failed: ${err.message || 'Unknown error'}` };
+      console.error('Gemini AI error details:', error);
+      
+      // Extract error message from various error formats
+      let errorMessage = 'AI generation failed';
+      
+      if (error && typeof error === 'object') {
+        const err = error as any;
+        
+        // Handle GoogleGenerativeAI errors
+        if (err.message) {
+          errorMessage = `AI generation failed: ${err.message}`;
+        } else if (err.error?.message) {
+          errorMessage = `AI generation failed: ${err.error.message}`;
+        } else if (err.statusText) {
+          errorMessage = `AI generation failed: ${err.statusText}`;
+        }
+        
+        // Add status code if available
+        if (err.status) {
+          errorMessage += ` (Status: ${err.status})`;
+        } else if (err.error?.status) {
+          errorMessage += ` (Status: ${err.error.status})`;
+        }
+      }
+      
+      // Create proper error object that error handler can process
+      const appError = new Error(errorMessage) as Error & { statusCode?: number };
+      appError.statusCode = 500;
+      throw appError;
     }
   }
 

@@ -452,10 +452,15 @@ function Topics() {
                 md={4}
                 lg={3}
                 key={topic.id}
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
               >
                 <motion.div
                   variants={fadeInUp}
                   layout
+                  style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
                 >
                   <TopicCard
                     topic={topic}

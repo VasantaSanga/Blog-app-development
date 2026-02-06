@@ -282,6 +282,8 @@ function Search() {
                 md={4}
                 key={blog.id}
                 sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
                   animation: 'fadeIn 0.5s ease-out forwards',
                   animationDelay: `${index * 0.05}s`,
                   opacity: 0,

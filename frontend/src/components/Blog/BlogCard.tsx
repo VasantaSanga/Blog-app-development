@@ -19,6 +19,7 @@ import { AccessTime, Visibility, Favorite } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { motion } from 'framer-motion';
 import { Blog } from '../../types';
+import { getImageUrl } from '../../utils/imageUtils';
 
 // Default cover image for blogs without a custom image
 const DEFAULT_COVER_IMAGE = `${process.env.REACT_APP_API_URL?.replace('/api', '') || 'http://localhost:5000'}/uploads/image-1768993313911-666459579.jpg`;
@@ -48,8 +49,8 @@ function BlogCard({ blog, variant = 'default' }: BlogCardProps) {
   const isCompact = variant === 'compact';
   const isDraft = status === 'DRAFT';
   
-  // Use default image if no cover image is provided
-  const displayImage = coverImage || DEFAULT_COVER_IMAGE;
+  // Use default image if no cover image is provided, and format URL properly
+  const displayImage = getImageUrl(coverImage || DEFAULT_COVER_IMAGE);
 
   return (
     <Card
@@ -131,8 +132,14 @@ function BlogCard({ blog, variant = 'default' }: BlogCardProps) {
         )}
       </Box>
 
-      <CardContent sx={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
-
+      <CardContent 
+        sx={{ 
+          flex: 1, 
+          display: 'flex', 
+          flexDirection: 'column',
+          minHeight: 0, // Important for flexbox to work properly
+        }}
+      >
         {/* Title */}
         <Typography
           variant={isCompact ? 'h6' : 'h5'}
@@ -148,50 +155,61 @@ function BlogCard({ blog, variant = 'default' }: BlogCardProps) {
             overflow: 'hidden',
             color: 'text.primary',
             transition: 'color 0.3s ease',
+            flexShrink: 0, // Prevent title from shrinking
           }}
         >
           {title}
         </Typography>
 
-        {/* Excerpt */}
-        {!isCompact && excerpt && (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{
-              mb: 2,
-              display: '-webkit-box',
-              WebkitLineClamp: 3,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-              lineHeight: 1.6,
-            }}
-          >
-            {excerpt}
-          </Typography>
-        )}
-
-        {/* Tags */}
-        {tags && tags.length > 0 && !isCompact && (
-          <Stack direction="row" spacing={0.5} sx={{ mb: 2, flexWrap: 'wrap', gap: 0.5 }}>
-            {tags.slice(0, 3).map((tag) => (
-              <Chip
-                key={tag}
-                label={`#${tag}`}
-                size="small"
-                variant="outlined"
+        {/* Excerpt - Fixed height container */}
+        {!isCompact && (
+          <Box sx={{ flex: '1 1 auto', minHeight: 0, mb: 2 }}>
+            {excerpt ? (
+              <Typography
+                variant="body2"
+                color="text.secondary"
                 sx={{
-                  fontSize: '0.7rem',
-                  height: 24,
-                  borderRadius: 1,
+                  display: '-webkit-box',
+                  WebkitLineClamp: 3,
+                  WebkitBoxOrient: 'vertical',
+                  overflow: 'hidden',
+                  lineHeight: 1.6,
+                  minHeight: '4.8em', // Fixed height for 3 lines (1.6 * 3)
                 }}
-              />
-            ))}
-          </Stack>
+              >
+                {excerpt}
+              </Typography>
+            ) : (
+              <Box sx={{ minHeight: '4.8em' }} /> // Spacer when no excerpt
+            )}
+          </Box>
         )}
 
-        {/* Meta info */}
-        <Box sx={{ mt: 'auto' }}>
+        {/* Tags - Fixed height container */}
+        {!isCompact && (
+          <Box sx={{ flexShrink: 0, mb: 2, minHeight: tags && tags.length > 0 ? 32 : 0 }}>
+            {tags && tags.length > 0 && (
+              <Stack direction="row" spacing={0.5} sx={{ flexWrap: 'wrap', gap: 0.5 }}>
+                {tags.slice(0, 3).map((tag) => (
+                  <Chip
+                    key={tag}
+                    label={`#${tag}`}
+                    size="small"
+                    variant="outlined"
+                    sx={{
+                      fontSize: '0.7rem',
+                      height: 24,
+                      borderRadius: 1,
+                    }}
+                  />
+                ))}
+              </Stack>
+            )}
+          </Box>
+        )}
+
+        {/* Meta info - Always at bottom */}
+        <Box sx={{ mt: 'auto', flexShrink: 0 }}>
           <Box
             sx={{
               display: 'flex',
@@ -225,12 +243,10 @@ function BlogCard({ blog, variant = 'default' }: BlogCardProps) {
                 <AccessTime sx={{ fontSize: 16 }} />
                 <Typography variant="caption">{readingTime} min</Typography>
               </Box>
-              {views > 0 && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Visibility sx={{ fontSize: 16 }} />
-                  <Typography variant="caption">{views}</Typography>
-                </Box>
-              )}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                <Visibility sx={{ fontSize: 16 }} />
+                <Typography variant="caption">{views || 0}</Typography>
+              </Box>
               {likeCount && likeCount > 0 && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   <Favorite sx={{ fontSize: 16 }} />

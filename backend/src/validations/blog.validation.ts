@@ -28,10 +28,26 @@ export const createBlogSchema = Joi.object({
       'string.max': 'Excerpt cannot exceed 500 characters',
     }),
   coverImage: Joi.string()
-    .uri()
     .allow('', null)
+    .custom((value, helpers) => {
+      // Allow empty string or null
+      if (!value || value === '') {
+        return value;
+      }
+      // Allow relative paths (starting with /)
+      if (value.startsWith('/')) {
+        return value;
+      }
+      // Validate as URI for absolute URLs
+      try {
+        new URL(value);
+        return value;
+      } catch {
+        return helpers.error('string.uri');
+      }
+    })
     .messages({
-      'string.uri': 'Cover image must be a valid URL',
+      'string.uri': 'Cover image must be a valid URL or file path',
     }),
   category: Joi.string()
     .uuid()
@@ -76,8 +92,24 @@ export const updateBlogSchema = Joi.object({
     .max(500)
     .allow('', null),
   coverImage: Joi.string()
-    .uri()
-    .allow('', null),
+    .allow('', null)
+    .custom((value, helpers) => {
+      // Allow empty string or null
+      if (!value || value === '') {
+        return value;
+      }
+      // Allow relative paths (starting with /)
+      if (value.startsWith('/')) {
+        return value;
+      }
+      // Validate as URI for absolute URLs
+      try {
+        new URL(value);
+        return value;
+      } catch {
+        return helpers.error('string.uri');
+      }
+    }),
   category: Joi.string()
     .uuid()
     .allow(null, ''),
@@ -98,8 +130,24 @@ export const autoSaveBlogSchema = Joi.object({
     .max(500)
     .allow('', null),
   coverImage: Joi.string()
-    .uri()
-    .allow('', null),
+    .allow('', null)
+    .custom((value, helpers) => {
+      // Allow empty string or null
+      if (!value || value === '') {
+        return value;
+      }
+      // Allow relative paths (starting with /)
+      if (value.startsWith('/')) {
+        return value;
+      }
+      // Validate as URI for absolute URLs
+      try {
+        new URL(value);
+        return value;
+      } catch {
+        return helpers.error('string.uri');
+      }
+    }),
   category: Joi.string()
     .uuid()
     .allow(null, ''),

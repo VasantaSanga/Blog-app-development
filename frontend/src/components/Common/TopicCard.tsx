@@ -80,9 +80,16 @@ function TopicCard({ topic, onClick, selected }: TopicCardProps) {
         }),
       }}
     >
-      <CardContent>
+      <CardContent
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          height: '100%',
+          minHeight: 0,
+        }}
+      >
         {/* Category & Difficulty */}
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2 }}>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 2, flexShrink: 0 }}>
           {topic.category && (
             <Chip
               label={topic.category.name}
@@ -113,49 +120,64 @@ function TopicCard({ topic, onClick, selected }: TopicCardProps) {
             mb: 1,
             lineHeight: 1.3,
             transition: 'color 0.3s ease',
+            display: '-webkit-box',
+            WebkitLineClamp: 2,
+            WebkitBoxOrient: 'vertical',
+            overflow: 'hidden',
+            flexShrink: 0,
+            minHeight: '3.2em', // Fixed height for 2 lines (1.6 * 2)
           }}
         >
           {topic.title}
         </Typography>
 
-        {/* Description */}
-        {topic.description && (
-          <Typography
-            variant="body2"
-            color="text.secondary"
-            sx={{
-              mb: 2,
-              display: '-webkit-box',
-              WebkitLineClamp: 2,
-              WebkitBoxOrient: 'vertical',
-              overflow: 'hidden',
-            }}
-          >
-            {topic.description}
-          </Typography>
-        )}
+        {/* Description - Fixed height container */}
+        <Box sx={{ flex: '1 1 auto', minHeight: 0, mb: 2 }}>
+          {topic.description ? (
+            <Typography
+              variant="body2"
+              color="text.secondary"
+              sx={{
+                display: '-webkit-box',
+                WebkitLineClamp: 2,
+                WebkitBoxOrient: 'vertical',
+                overflow: 'hidden',
+                lineHeight: 1.5,
+                minHeight: '3em', // Fixed height for 2 lines (1.5 * 2)
+              }}
+            >
+              {topic.description}
+            </Typography>
+          ) : (
+            <Box sx={{ minHeight: '3em' }} /> // Spacer when no description
+          )}
+        </Box>
 
-        {/* Suggested Tags */}
-        {topic.suggestedTags && topic.suggestedTags.length > 0 && (
-          <Stack direction="row" spacing={0.5} flexWrap="wrap" gap={0.5}>
-            {topic.suggestedTags.slice(0, 4).map((tag) => (
-              <Chip
-                key={tag}
-                label={`#${tag}`}
-                size="small"
-                variant="outlined"
-                sx={{ fontSize: '0.7rem', height: 22 }}
-              />
-            ))}
-          </Stack>
-        )}
+        {/* Suggested Tags - Fixed height container */}
+        <Box sx={{ flexShrink: 0, mb: 2, minHeight: topic.suggestedTags && topic.suggestedTags.length > 0 ? 28 : 0 }}>
+          {topic.suggestedTags && topic.suggestedTags.length > 0 && (
+            <Stack direction="row" spacing={0.5} flexWrap="wrap" gap={0.5}>
+              {topic.suggestedTags.slice(0, 4).map((tag) => (
+                <Chip
+                  key={tag}
+                  label={`#${tag}`}
+                  size="small"
+                  variant="outlined"
+                  sx={{ fontSize: '0.7rem', height: 22 }}
+                />
+              ))}
+            </Stack>
+          )}
+        </Box>
 
-        {/* Usage count */}
-        {topic.usageCount && topic.usageCount > 0 && (
-          <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block' }}>
-            Used {topic.usageCount} times
-          </Typography>
-        )}
+        {/* Usage count - Always at bottom */}
+        <Box sx={{ mt: 'auto', flexShrink: 0 }}>
+          {topic.usageCount && topic.usageCount > 0 && (
+            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+              Used {topic.usageCount} times
+            </Typography>
+          )}
+        </Box>
       </CardContent>
     </Card>
   );

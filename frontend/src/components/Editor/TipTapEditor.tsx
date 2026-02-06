@@ -91,6 +91,13 @@ function TipTapEditor({ content, onChange, placeholder = 'Start writing your blo
     },
   });
 
+  // Update editor content when prop changes (e.g., when AI generates content)
+  React.useEffect(() => {
+    if (editor && content !== editor.getHTML()) {
+      editor.commands.setContent(content);
+    }
+  }, [content, editor]);
+
   const handleImageUpload = useCallback(async (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;

@@ -338,11 +338,16 @@ function Home() {
                 sm={6}
                 md={4}
                 key={blog.id}
+                sx={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                }}
               >
                 <motion.div
                   variants={fadeInUp}
                   whileHover={{ y: -8 }}
                   transition={{ duration: 0.3 }}
+                  style={{ height: '100%', display: 'flex', flexDirection: 'column' }}
                 >
                   <BlogCard blog={blog} />
                 </motion.div>

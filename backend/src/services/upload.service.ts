@@ -9,10 +9,12 @@ import config from '../config/env.js';
 
 class UploadService {
   /**
-   * Get file URL
+   * Get file URL (returns full URL for frontend access)
    */
   getFileUrl(filename: string): string {
-    return `/uploads/${filename}`;
+    // Get base URL - use BACKEND_URL env var or construct from PORT
+    const baseUrl = process.env.BACKEND_URL || `http://localhost:${config.port}`;
+    return `${baseUrl}/uploads/${filename}`;
   }
 
   /**

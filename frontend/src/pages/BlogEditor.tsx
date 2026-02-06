@@ -25,6 +25,7 @@ import {
   DialogContent,
   DialogActions,
   SelectChangeEvent,
+  Backdrop,
 } from '@mui/material';
 import {
   Publish,
@@ -40,6 +41,7 @@ import TipTapEditor from '../components/Editor/TipTapEditor';
 import LoadingSpinner from '../components/Common/LoadingSpinner';
 import { blogAPI, categoryAPI, uploadAPI, aiAPI } from '../services/api';
 import { Category } from '../types';
+import { getImageUrl } from '../utils/imageUtils';
 
 function BlogEditor() {
   const { id } = useParams();
@@ -75,7 +77,7 @@ function BlogEditor() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
-  // Apply topic data from navigation state and auto-generate if requested
+  // Apply topic data from navigation state
   useEffect(() => {
     if (location.state?.suggestedTitle && !isEditing) {
       setTitle(location.state.suggestedTitle);
@@ -85,16 +87,16 @@ function BlogEditor() {
       if (location.state.categoryId) {
         setCategory(location.state.categoryId);
       }
-      // Auto-generate content if requested from Topics page
+      // Auto-generate only if user clicked "Generate by AI" button on Topics page
       if (location.state.autoGenerate) {
-        // Wait for initial data load before generating
+        // Wait for initial data load and editor to be ready before generating
         const timer = setTimeout(() => {
           handleGenerateAI(
             location.state.suggestedTitle,
             location.state.suggestedTags,
             location.state.categoryName
           );
-        }, 500);
+        }, 1000);
         return () => clearTimeout(timer);
       }
     }
@@ -385,7 +387,36 @@ function BlogEditor() {
   }
 
   return (
-    <Box>
+    <Box sx={{ position: 'relative' }}>
+      {/* Full-screen loader overlay when generating AI content */}
+      <Backdrop
+        open={generating}
+        sx={{
+          position: 'fixed',
+          zIndex: (theme) => theme.zIndex.drawer + 1,
+          color: '#fff',
+          backgroundColor: 'rgba(0, 0, 0, 0.7)',
+          backdropFilter: 'blur(4px)',
+        }}
+      >
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            gap: 3,
+          }}
+        >
+          <CircularProgress size={64} thickness={4} sx={{ color: 'secondary.main' }} />
+          <Typography variant="h5" fontWeight={600}>
+            Generating Content...
+          </Typography>
+          <Typography variant="body1" color="text.secondary" sx={{ maxWidth: 400, textAlign: 'center' }}>
+            Our AI is crafting your blog post. This may take a few moments.
+          </Typography>
+        </Box>
+      </Backdrop>
+
       {/* Header */}
       <Box
         sx={{
@@ -513,7 +544,7 @@ function BlogEditor() {
               {coverImage ? (
                 <Box sx={{ position: 'relative' }}>
                   <img
-                    src={coverImage}
+                    src={getImageUrl(coverImage)}
                     alt="Cover"
                     style={{
                       width: '100%',
