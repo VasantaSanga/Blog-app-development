@@ -23,12 +23,10 @@ import { blogAPI, categoryAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { Blog, Category } from '../types';
 import { 
-  FadeInUp, 
   ScrollReveal, 
   staggerContainer, 
   fadeInUp,
-  scaleIn,
-  MotionBox
+  scaleIn
 } from '../components/Common/Animations';
 
 interface BlogParams {
@@ -260,7 +258,7 @@ function Home() {
                 sx={{ fontWeight: 500, cursor: 'pointer' }}
               />
             </motion.div>
-            {categories.map((category, index) => (
+            {categories.map((category, _index) => (
               <motion.div 
                 key={category.id} 
                 variants={scaleIn}
@@ -331,7 +329,7 @@ function Home() {
                 </motion.div>
               </Grid>
             ))
-          : blogs.map((blog, index) => (
+          : blogs.map((blog, _index) => (
               <Grid
                 item
                 xs={12}

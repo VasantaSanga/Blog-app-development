@@ -315,7 +315,7 @@ function MyBlogs() {
         <DialogTitle>Delete Blog</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to delete "{selectedBlog?.title}"? This action cannot be undone.
+            Are you sure you want to delete &quot;{selectedBlog?.title}&quot;? This action cannot be undone.
           </Typography>
         </DialogContent>
         <DialogActions>

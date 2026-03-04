@@ -444,7 +444,7 @@ function Topics() {
                 </motion.div>
               </Grid>
             ))
-          : filteredTopics.map((topic, index) => (
+          : filteredTopics.map((topic, _index) => (
               <Grid
                 item
                 xs={12}

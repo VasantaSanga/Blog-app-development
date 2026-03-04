@@ -658,7 +658,7 @@ function BlogEditor() {
         <DialogTitle>Publish Blog</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you ready to publish "{title || 'Untitled'}"? Published blogs will be visible to everyone.
+            Are you ready to publish &quot;{title || 'Untitled'}&quot;? Published blogs will be visible to everyone.
           </Typography>
         </DialogContent>
         <DialogActions>
