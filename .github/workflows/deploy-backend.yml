@@ -1,0 +1,75 @@
+name: Deploy Backend (Elastic Beanstalk)
+
+on:
+  push:
+    branches: ["main"]
+    paths:
+      - "backend/**"
+
+concurrency:
+  group: deploy-backend-main
+  cancel-in-progress: true
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy_backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ vars.AWS_ROLE_ARN }}
+          aws-region: ${{ vars.AWS_REGION }}
+
+      - name: Install backend deps
+        working-directory: backend
+        run: npm ci
+
+      - name: Build backend (if present)
+        working-directory: backend
+        run: npm run build --if-present
+
+        # Run Prisma migrations before deployment
+      - name: Run Prisma migrations
+        working-directory: backend
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+        run: npx prisma migrate deploy
+
+      # Create a zip of backend folder (EB expects zip source bundle)
+      - name: Zip backend for EB
+        run: |
+          cd backend
+          zip -r ../backend-deploy.zip . -x "node_modules/*" ".git/*" ".github/*"
+          cd ..
+
+      - name: Upload bundle to S3 (EB versions bucket)
+        run: |
+          aws s3 cp backend-deploy.zip "s3://${{ vars.EB_S3_BUCKET }}/backend/backend-${{ github.sha }}.zip"
+
+      - name: Create EB application version
+        run: |
+          aws elasticbeanstalk create-application-version \
+            --application-name "${{ vars.EB_APP_NAME }}" \
+            --version-label "backend-${{ github.sha }}" \
+            --source-bundle S3Bucket="${{ vars.EB_S3_BUCKET }}",S3Key="backend/backend-${{ github.sha }}.zip"
+
+      - name: Deploy EB version
+        run: |
+          aws elasticbeanstalk update-environment \
+            --environment-name "${{ vars.EB_ENV_NAME }}" \
+            --version-label "backend-${{ github.sha }}"
