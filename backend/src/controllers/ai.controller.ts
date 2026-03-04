@@ -44,8 +44,6 @@ export const generateContent = async (
       return;
     }
 
-    console.log('Generating content with:', { title, tags, category, tone });
-
     const content = await aiService.generateBlogContent({
       title,
       tags,

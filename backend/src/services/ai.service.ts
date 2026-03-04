@@ -18,18 +18,18 @@ class AIService {
         // Note: gemini-1.5-pro and gemini-1.5-flash are no longer available for new projects
         // Alternative fallback: gemini-3-flash-preview or gemini-3-pro-preview
         this.model = this.genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
-        console.log('AI Service initialized successfully with model: gemini-2.0-flash');
+        console.warn('AI Service initialized successfully with model: gemini-2.0-flash');
       } catch (error) {
         console.error('Failed to initialize AI Service with gemini-2.0-flash:', error);
-        // Try fallback models
+        if (!this.genAI) return;
         try {
-          this.model = this.genAI!.getGenerativeModel({ model: 'gemini-3-flash-preview' });
-          console.log('AI Service initialized with fallback model: gemini-3-flash-preview');
+          this.model = this.genAI.getGenerativeModel({ model: 'gemini-3-flash-preview' });
+          console.warn('AI Service initialized with fallback model: gemini-3-flash-preview');
         } catch (fallbackError1) {
           console.error('Fallback model gemini-3-flash-preview failed:', fallbackError1);
           try {
-            this.model = this.genAI!.getGenerativeModel({ model: 'gemini-3-pro-preview' });
-            console.log('AI Service initialized with fallback model: gemini-3-pro-preview');
+            this.model = this.genAI.getGenerativeModel({ model: 'gemini-3-pro-preview' });
+            console.warn('AI Service initialized with fallback model: gemini-3-pro-preview');
           } catch (fallbackError2) {
             console.error('All models failed to initialize:', fallbackError2);
             this.genAI = null;
@@ -81,23 +81,23 @@ class AIService {
       // Extract error message from various error formats
       let errorMessage = 'AI generation failed';
       
-      if (error && typeof error === 'object') {
-        const err = error as any;
-        
-        // Handle GoogleGenerativeAI errors
-        if (err.message) {
+      if (error instanceof Error) {
+        errorMessage = `AI generation failed: ${error.message}`;
+      } else if (error && typeof error === 'object') {
+        const err = error as Record<string, unknown>;
+        const nested = err.error as Record<string, unknown> | undefined;
+
+        if (typeof err.message === 'string') {
           errorMessage = `AI generation failed: ${err.message}`;
-        } else if (err.error?.message) {
-          errorMessage = `AI generation failed: ${err.error.message}`;
-        } else if (err.statusText) {
+        } else if (typeof nested?.message === 'string') {
+          errorMessage = `AI generation failed: ${nested.message}`;
+        } else if (typeof err.statusText === 'string') {
           errorMessage = `AI generation failed: ${err.statusText}`;
         }
-        
-        // Add status code if available
-        if (err.status) {
-          errorMessage += ` (Status: ${err.status})`;
-        } else if (err.error?.status) {
-          errorMessage += ` (Status: ${err.error.status})`;
+
+        const status = err.status ?? nested?.status;
+        if (status) {
+          errorMessage += ` (Status: ${status})`;
         }
       }
       
