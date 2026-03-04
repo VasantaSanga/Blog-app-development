@@ -17,7 +17,6 @@ import {
 } from '@mui/material';
 import { AccessTime, Visibility, Favorite } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { motion } from 'framer-motion';
 import { Blog } from '../../types';
 import { getImageUrl } from '../../utils/imageUtils';
 

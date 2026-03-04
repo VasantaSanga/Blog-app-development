@@ -199,7 +199,7 @@ function Login() {
         </Divider>
 
         <Typography variant="body2" textAlign="center">
-          Don't have an account?{' '}
+          Don&apos;t have an account?{' '}
           <Link
             component={RouterLink}
             to="/register"

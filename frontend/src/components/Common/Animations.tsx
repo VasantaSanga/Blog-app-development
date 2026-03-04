@@ -472,7 +472,7 @@ interface CountUpProps {
 
 export const CountUp: React.FC<CountUpProps> = ({ 
   end, 
-  duration = 2,
+  duration: _duration = 2,
   className 
 }) => {
   return (
