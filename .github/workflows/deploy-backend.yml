@@ -43,13 +43,6 @@ jobs:
         working-directory: backend
         run: npm run build --if-present
 
-        # Run Prisma migrations before deployment
-      - name: Run Prisma migrations
-        working-directory: backend
-        env:
-          DATABASE_URL: ${{ secrets.DATABASE_URL }}
-        run: npx prisma migrate deploy
-
       # Create a zip of backend folder (EB expects zip source bundle)
       - name: Zip backend for EB
         run: |
