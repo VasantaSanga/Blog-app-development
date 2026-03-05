@@ -241,3 +241,5 @@ The API uses middleware guards for route protection:
 ## 📄 License
 
 MIT License - feel free to use this project for learning or commercial purposes.
+
+end
