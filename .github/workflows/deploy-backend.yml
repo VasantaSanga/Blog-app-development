@@ -56,13 +56,15 @@ jobs:
 
       - name: Create EB application version
         run: |
+          VERSION="backend-${{ github.sha }}-${{ github.run_number }}"
           aws elasticbeanstalk create-application-version \
             --application-name "${{ vars.EB_APP_NAME }}" \
-            --version-label "backend-${{ github.sha }}" \
+            --version-label "$VERSION" \
             --source-bundle S3Bucket="${{ vars.EB_S3_BUCKET }}",S3Key="backend/backend-${{ github.sha }}.zip"
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
 
       - name: Deploy EB version
         run: |
           aws elasticbeanstalk update-environment \
             --environment-name "${{ vars.EB_ENV_NAME }}" \
-            --version-label "backend-${{ github.sha }}"
+            --version-label "${{ env.VERSION }}"
