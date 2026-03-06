@@ -10,12 +10,12 @@
     "dev": "tsx watch src/server.ts",
     "lint": "eslint src --ext .ts",
     "lint:fix": "eslint src --ext .ts --fix",
-    "prisma:generate": "prisma generate",
-    "prisma:push": "prisma db push",
-    "prisma:studio": "prisma studio",
+    "prisma:generate": "npx prisma generate",
+    "prisma:push": "npx prisma db push",
+    "prisma:studio": "npx prisma studio",
     "prisma:seed": "tsx prisma/seed.ts",
     "setup": "npm run prisma:generate && npm run prisma:push && npm run prisma:seed",
-    "postinstall": "prisma generate"
+    "postinstall": "npx prisma generate"
   },
   "keywords": [
     "blog",
