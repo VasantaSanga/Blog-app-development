@@ -38,6 +38,8 @@ jobs:
       - name: Build React app
         working-directory: frontend
         run: npm run build
+        env:
+          REACT_APP_API_URL: ${{ vars.REACT_APP_API_URL }}
 
       - name: Upload to S3
         run: |
